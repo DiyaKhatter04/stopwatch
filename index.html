@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stopwatch</title>
+    <style>
+        body {
+            background-color: black;
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            text-align: center;
+            padding: 20px;
+            border: 2px solid white;
+            border-radius: 10px;
+        }
+        label {
+            display: block;
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 10px;
+            cursor: pointer;
+        }
+        button.stop {
+            background-color: red;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            font-size: 18px;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <label id="time">00:00:00</label>
+        <button id="startStop">Start</button>
+        <button id="lapReset">Lap</button>
+        <ul id="laps"></ul>
+    </div>
+
+    <script>
+        let startTime, intervalId;
+        let running = false;
+        let laps = [];
+
+        const timeLabel = document.getElementById('time');
+        const startStopButton = document.getElementById('startStop');
+        const lapResetButton = document.getElementById('lapReset');
+        const lapsList = document.getElementById('laps');
+
+        function formatTime(duration) {
+            const hours = Math.floor(duration / 3600000).toString().padStart(2, '0');
+            const minutes = Math.floor((duration % 3600000) / 60000).toString().padStart(2, '0');
+            const seconds = Math.floor((duration % 60000) / 1000).toString().padStart(2, '0');
+            return `${hours}:${minutes}:${seconds}`;
+        }
+
+        function updateDisplay() {
+            const currentTime = new Date() - startTime;
+            timeLabel.textContent = formatTime(currentTime);
+        }
+
+        startStopButton.addEventListener('click', function () {
+            if (!running) {
+                startTime = new Date() - (laps.length ? laps[laps.length - 1] : 0);  // resume time
+                intervalId = setInterval(updateDisplay, 1000);
+                startStopButton.textContent = 'Stop';
+                startStopButton.classList.add('stop');
+                lapResetButton.textContent = 'Lap';
+                running = true;
+            } else {
+                clearInterval(intervalId);
+                laps.push(new Date() - startTime);
+                startStopButton.textContent = 'Start';
+                startStopButton.classList.remove('stop');
+                lapResetButton.textContent = 'Reset';
+                running = false;
+            }
+        });
+
+        lapResetButton.addEventListener('click', function () {
+            if (running) {
+                const lapTime = formatTime(new Date() - startTime);
+                const li = document.createElement('li');
+                li.textContent = `Lap: ${lapTime}`;
+                lapsList.prepend(li);
+            } else {
+                // Reset everything
+                laps = [];
+                timeLabel.textContent = '00:00:00';
+                lapsList.innerHTML = '';
+            }
+        });
+    </script>
+
+</body>
+</html>
